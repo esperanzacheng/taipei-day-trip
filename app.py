@@ -92,27 +92,18 @@ def api_attractions():
 @app.route("/api/attraction/<id>", methods=["GET"])
 def api_attraction(id):
 	try:
-		# get valid id input list
+		# fetch attraction data
 		connection_object = connection_pool.get_connection()
 		my_cursor = connection_object.cursor()
-		validate_query = "SELECT id FROM Attraction"
-		my_cursor.execute(validate_query)
-		validate_result = my_cursor.fetchall()
-		list_result = [x[0] for x in validate_result]
+		my_query = "SELECT Attraction.*, GROUP_CONCAT(Attr_img.images) images FROM Attraction INNER JOIN Attr_img ON Attraction.id = Attr_img.attr_id WHERE Attraction.id = '%s' AND (Attr_img.type = 'jpg' OR Attr_img.type = 'png') GROUP BY Attraction.id;"
+		my_cursor.execute(my_query, [int(id)])
+		row_headers = [x[0] for x in my_cursor.description] # get column name
+		my_result = my_cursor.fetchone()
+		json_result = dict(zip(row_headers, my_result))
+		json_result["images"] = json_result["images"].split(",") # change images url string to list
+		return jsonify(data = json_result)
 
-		# validation check
-		if int(id) in list_result:
-			my_query = "SELECT Attraction.*, GROUP_CONCAT(Attr_img.images) images FROM Attraction INNER JOIN Attr_img ON Attraction.id = Attr_img.attr_id WHERE Attraction.id = '%s' AND (Attr_img.type = 'jpg' OR Attr_img.type = 'png') GROUP BY Attraction.id;"
-			my_cursor.execute(my_query, [int(id)])
-			row_headers = [x[0] for x in my_cursor.description] # get column name
-			my_result = my_cursor.fetchone()
-			json_result = dict(zip(row_headers, my_result))
-			json_result["images"] = json_result["images"].split(",") # change images url string to list
-			return jsonify(data = json_result)
-		else:
-			raise ValueError
-
-	except ValueError as error:
+	except (ValueError, IndexError, TypeError) as error:
 		return (jsonify(error = True, message = error.args[0]), 400)
 
 	finally:
