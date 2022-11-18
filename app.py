@@ -46,12 +46,12 @@ def api_attractions():
 		# fetch attraction data
 		page = int(request.args.get("page"))
 		keyword = request.args.get("keyword")
-		first_half_query = "SELECT Attraction.*, MIN(Attr_img.images) images FROM Attraction INNER JOIN Attr_img ON Attraction.id = Attr_img.attr_id WHERE (Attr_img.type = 'jpg' OR Attr_img.type = 'png')" 
+		first_half_query = "SELECT Attraction.*, GROUP_CONCAT(Attr_img.images) images FROM Attraction INNER JOIN Attr_img ON Attraction.id = Attr_img.attr_id WHERE (Attr_img.type = 'jpg' OR Attr_img.type = 'png')" 
 		if keyword == None:
 			second_half_query = "GROUP BY Attraction.id LIMIT %s,12;"
 			my_cursor.execute(first_half_query + second_half_query, [page*12])	
 		else:
-			second_half_query = "AND (category like %s OR description like %s) GROUP BY Attraction.id LIMIT %s,12;"
+			second_half_query = "AND (category like %s OR name like %s) GROUP BY Attraction.id LIMIT %s,12;"
 			my_cursor.execute(first_half_query + second_half_query, [keyword, "%"+keyword+"%", page*12])	
 
 		my_result = my_cursor.fetchall()
@@ -59,13 +59,15 @@ def api_attractions():
 		json_result = [] # store attraction data into json_result[]
 		for result in my_result:
 			json_result.append(dict(zip(row_headers,result)))
-
+		for result in json_result: # change images url string to list
+			result["images"] = result["images"].split(",")
+		
 		# fetch attraction count
 		if keyword == None:
 			count_query = "SELECT COUNT(*) FROM Attraction"
 			my_cursor.execute(count_query)
 		else:
-			count_query = "SELECT COUNT(*) FROM Attraction WHERE category like %s OR description like %s"
+			count_query = "SELECT COUNT(*) FROM Attraction WHERE category like %s OR name like %s"
 			my_cursor.execute(count_query, [keyword, "%"+keyword+"%"])
 		count_result = my_cursor.fetchone()
 		sum = count_result[0]
@@ -74,7 +76,7 @@ def api_attractions():
 		if (page + 1) * 12 < sum: # the last item this page is item[(page+1)*12]. if last item index is < item count, return nextPage index
 			page += 1
 		elif sum <= (page + 1) * 12 and (page + 1) * 12 < sum + 12: # if last page, return nextPage index as Null
-			page = "null"
+			page = None
 		else: # hit EOF, return 500
 			raise EOFError
 
@@ -100,11 +102,12 @@ def api_attraction(id):
 
 		# validation check
 		if int(id) in list_result:
-			my_query = "SELECT Attraction.*, MIN(Attr_img.images) images FROM Attraction INNER JOIN Attr_img ON Attraction.id = Attr_img.attr_id WHERE Attraction.id = '%s' AND (Attr_img.type = 'jpg' OR Attr_img.type = 'png') GROUP BY Attraction.id;"
+			my_query = "SELECT Attraction.*, GROUP_CONCAT(Attr_img.images) images FROM Attraction INNER JOIN Attr_img ON Attraction.id = Attr_img.attr_id WHERE Attraction.id = '%s' AND (Attr_img.type = 'jpg' OR Attr_img.type = 'png') GROUP BY Attraction.id;"
 			my_cursor.execute(my_query, [int(id)])
 			row_headers = [x[0] for x in my_cursor.description] # get column name
 			my_result = my_cursor.fetchone()
 			json_result = dict(zip(row_headers, my_result))
+			json_result["images"] = json_result["images"].split(",") # change images url string to list
 			return jsonify(data = json_result)
 		else:
 			raise ValueError
