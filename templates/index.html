@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta name="viewpoint", content="width=device-width, initial-scale=1.0" />
+        <meta charset="utf-8">
+        <title>台北一日遊</title>
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/index.css')}}" />
+        <script src="{{ url_for('static', filename='scripts/index.js')}}"></script>
+    </head>
+    <body>
+        <div class="head-container">
+            <div class="head-item1">台北一日遊</div>
+            <div class="head-item2">預定行程</div>
+            <div class="head-item3">登入/註冊</div>
+        </div>
+        <div class="banner-container" id="banner">
+            <div class="banner-item1">輕鬆享受台北一日悠閒</div>
+            <div class="banner-item2">探索每個角落，體驗城市的深度旅遊行程</div>
+            <div id="banner-form" class="banner-form">
+                <form id="search-bar" method="get" class="banner-form-search-bar">
+                    <input id="form-input" class="banner-form-search-bar"
+                    
+                    type="text"
+                    name="keyword"
+                    placeholder="輸入景點名稱查詢" 
+                    />
+                <button class="banner-form-icon-bg" type="submit">
+                    <img class="banner-form-icon" src="../static/images/icon_search.png" />
+                </button>
+                </form>
+
+            </div>
+        </div>
+        <div class="main" id="main"></div>
+        <div class="footer" id="footer">COPYRIGHT © 2021 台北一日遊</div>
+    </body>
+</html>
