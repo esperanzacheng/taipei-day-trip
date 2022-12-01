@@ -18,6 +18,7 @@ body{
     font-weight: 700;
     color: #448899;
     padding-left: 10px;
+    text-decoration: none;
 }
 
 .head-item2{
@@ -187,6 +188,7 @@ input{
     grid-template-rows: 157px 40px 45px;
     border-radius: 8px;
     border: 1.5px solid rgb(210, 210, 210);
+    text-decoration: none;
 }
 
 .main-item-img{
