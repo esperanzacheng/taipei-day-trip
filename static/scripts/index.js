@@ -2,6 +2,7 @@ let curPage = 0;
 let curUrl = "/api/attractions?page=";
 let nextPage;
 let curKeyword;
+let thisUrl = window.location.href;
 
 // create function to load attractions data in main
 async function loadAttraction(curUrl, curPage, curKeyword) {    
@@ -40,8 +41,9 @@ async function loadAttraction(curUrl, curPage, curKeyword) {
             container.classList.remove("main-alert");
             container.classList.add("main");
             for (let i = 0; i < 12; i++) {
-                let newItem = document.createElement("div");
+                let newItem = document.createElement("a");
                 newItem.classList.add("main-item");
+                newItem.setAttribute("href", thisUrl + "attraction/" + data["data"][i]["id"])
                 let newItemImg = document.createElement("img");
                 newItemImg.classList.add("main-item-img");
                 newItemImg.src = data["data"][i]["images"][0];
@@ -74,8 +76,7 @@ async function loadAttraction(curUrl, curPage, curKeyword) {
 
 function selectCat(text) {
     const searchBar = document.getElementById("form-input");
-    searchBar.removeAttribute("value");
-    searchBar.setAttribute("value", text);
+    searchBar.value = text;
     searchBar.setAttribute("placeholder", text);
 }
 
@@ -108,12 +109,13 @@ window.onload = function(){
         while (container.firstChild) {
             container.removeChild(container.firstChild);
         }
-        let keyword = searchBar[0].value; // get keyword in search bar
+        // let keyword = searchBar[0].value; // get keyword in search bar
+        let keyword = searchBar[0].value;
         curPage = 0;
         curUrl = "/api/attractions?page=";
         loadAttraction(curUrl, curPage, keyword);
     })    
-
+    
     // event listener - to pop out category menu if user click the search bar
     const formInput = document.getElementById("form-input");
     formInput.addEventListener("click", (e) => {

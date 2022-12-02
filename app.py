@@ -46,7 +46,8 @@ def api_attractions():
 		# fetch attraction data
 		page = int(request.args.get("page"))
 		keyword = request.args.get("keyword")
-		first_half_query = "SELECT Attraction.*, GROUP_CONCAT(Attr_img.images) images FROM Attraction INNER JOIN Attr_img ON Attraction.id = Attr_img.attr_id WHERE (Attr_img.type = 'jpg' OR Attr_img.type = 'png')" 
+		first_half_query = "SELECT Attraction.*, GROUP_CONCAT(Attr_img.images) images FROM Attraction \
+			INNER JOIN Attr_img ON Attraction.id = Attr_img.attr_id WHERE (Attr_img.type = 'jpg' OR Attr_img.type = 'png')"
 		if keyword == None:
 			second_half_query = "GROUP BY Attraction.id LIMIT %s,12;"
 			my_cursor.execute(first_half_query + second_half_query, [page*12])	
