@@ -214,15 +214,19 @@ def user_login():
 			my_query = "SELECT id, name from User WHERE email = %s AND password = %s;"
 			my_cursor.execute(my_query, (email, password))
 			my_result = my_cursor.fetchone()
+			print("try before if")
 			if my_result == None:
 				return (jsonify(error = True, message = "info is wrong"), 400)
 			else:
 				expiredLength = datetime.datetime.utcnow() + datetime.timedelta(days=7)
 				token = jwt.encode({"id": my_result[0], "exp": expiredLength}, app.config["SECRET_KEY"])
+				print("before")
 				@after_this_request
 				def set_cookie(resp):
+					print("after1")
 					resp = make_response((jsonify(ok = True), 200))
 					resp.set_cookie(key="token", value=token, expires=expiredLength, httponly=True)
+					print("after2")
 					return resp
 				return (jsonify(ok = True), 200)
 		except:
