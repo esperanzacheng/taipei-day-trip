@@ -170,7 +170,7 @@ def token_auth():
 	if not token:
 		return (jsonify(error = True, message = "token is missing"), 403)
 	try:
-		data = jwt.decode(token, app.config["SECRET_KEY"], algorithms="HS256")
+		data = jwt.decode(token, os.getenv("secretkey"), algorithms="HS256")
 		print(data)
 		return data["id"]
 	except:
@@ -184,7 +184,7 @@ def user_auth():
 	if not token:
 		return (jsonify(data = None), 200)
 	try:
-		data = jwt.decode(token, app.config["SECRET_KEY"], algorithms="HS256")
+		data = jwt.decode(token, os.getenv("secretkey"), algorithms="HS256")
 		user_id = data["id"]
 		if user_id:
 			connection_object = connection_pool.get_connection()
@@ -216,10 +216,13 @@ def user_login():
 			my_result = my_cursor.fetchone()
 			print("try before if")
 			if my_result == None:
+				print("enter result == none")
 				return (jsonify(error = True, message = "info is wrong"), 400)
 			else:
+				print("enter else1")
 				expiredLength = datetime.datetime.utcnow() + datetime.timedelta(days=7)
-				token = jwt.encode({"id": my_result[0], "exp": expiredLength}, app.config["SECRET_KEY"])
+				print("enter else2")
+				token = jwt.encode({"id": my_result[0], "exp": expiredLength}, os.getenv("secretkey"))
 				print("before")
 				@after_this_request
 				def set_cookie(resp):
