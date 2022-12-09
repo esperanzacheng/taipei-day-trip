@@ -378,7 +378,7 @@ ul.slides input[type="radio"] {
     -webkit-appearance: none;
     appearance: none;
     position: relative;
-    z-index: 100;
+    z-index: 50;
     margin: -1px;
     background-color: #FFFFFF;
     -webkit-transform: scale(0.6);

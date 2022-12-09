@@ -211,7 +211,7 @@ def user_login():
 		try: 
 			connection_object = connection_pool.get_connection()
 			my_cursor = connection_object.cursor()
-			my_query = "SELECT id, name from USER WHERE email = %s AND password = %s;"
+			my_query = "SELECT id, name from User WHERE email = %s AND password = %s;"
 			my_cursor.execute(my_query, (email, password))
 			my_result = my_cursor.fetchone()
 			if my_result == None:
