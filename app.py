@@ -172,24 +172,22 @@ def token_auth():
 		return (jsonify(error = True, message = "token is missing"), 403)
 	try:
 		data = jwt.decode(token, os.getenv("secretkey"), algorithms="HS256")
-		print(data)
 		return data["id"]
 	except:
-		print("what!")
 		return (jsonify(error = True, message = "token is invalid"), 403)
 
 
 @app.route("/api/user/auth", methods=["GET"])
 def user_auth():
 	token = request.cookies.get("token")
+	connection_object = connection_pool.get_connection()
+	my_cursor = connection_object.cursor()
 	if not token:
 		return (jsonify(data = None), 200)
 	try:
 		data = jwt.decode(token, os.getenv("secretkey"), algorithms="HS256")
 		user_id = data["id"]
 		if user_id:
-			connection_object = connection_pool.get_connection()
-			my_cursor = connection_object.cursor()
 			my_query = "SELECT id, name, email FROM User WHERE id = %s"
 			my_cursor.execute(my_query, [user_id])
 			my_result = my_cursor.fetchone()
@@ -223,7 +221,7 @@ def user_login():
 				print("enter else1")
 				expiredLength = datetime.datetime.utcnow() + datetime.timedelta(days=7)
 				print("enter else2")
-				token = jwt.encode({"id": my_result[0], "exp": expiredLength}, os.getenv("secretkey"), algorithms="HS256")
+				token = jwt.encode({"id": my_result[0], "exp": expiredLength}, os.getenv("secretkey"), algorithm="HS256")
 				print(token)
 				token2 = jwt.encode({"id": my_result[0], "exp": expiredLength}, os.getenv("secretkey"))
 				print(token2)
