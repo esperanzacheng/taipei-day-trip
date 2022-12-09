@@ -347,7 +347,7 @@ img.slide {
     justify-content: center;
     border: none;
     opacity: 0.8;
-    z-index: 100;
+    z-index: 50;
 }
 
 .slide-button-right {
@@ -361,7 +361,7 @@ img.slide {
     justify-content: center;
     border: none;
     opacity: 0.8;
-    z-index: 100;
+    z-index: 50;
 }
 
 ul.slides {

@@ -7,12 +7,39 @@
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/index.css')}}" />
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/attraction.css')}}" />
         <script src="{{ url_for('static', filename='scripts/attraction.js')}}"></script>
+        
     </head>
     <body>
         <div class="head-container">
             <a id="home-button" class="head-item1">台北一日遊</a>
             <div class="head-item2">預定行程</div>
-            <div class="head-item3">登入/註冊</div>
+            <div id="log-in-button" class="head-item3" onclick="showLoginForm()">登入/註冊</div>
+            <div id="log-out-button" class="head-item4">登出</div>
+        </div>
+        <div class="pop-up-login-container">
+            <form id="login-form" class="banner-login-container">
+                <div class="banner-login-upper-border"></div>
+                <div class="banner-login-headline">登入會員帳號</div>
+                <span class="banner-login-close-button" onclick="hideLoginForm()"></span>
+                <input id="login-email" class="banner-login-input" type="text" name="email" placeholder="輸入電子信箱"/>
+                <input id="login-password" class="banner-login-input" type="text" name="password" placeholder="輸入密碼"/>
+                <button id="login-form-button" class="banner-login-button">登入帳戶</button>
+                <div id="info-not-filled" class="banner-login-alert-error">帳號或密碼填寫不完整</div>
+                <div id="info-is-wrong" class="banner-login-alert-error">帳號或密碼輸入錯誤</div>
+                <div id="to-register" class="banner-login-register-button" onclick="switchToRegisterForm()">還沒有帳戶？點此註冊</div>
+            </form>
+            <form id="register-form" class="banner-register-container">
+                <div class="banner-login-upper-border"></div>
+                <div class="banner-login-headline">註冊會員帳號</div>
+                <span class="banner-login-close-button" onclick="hideRegisterForm()"></span>
+                <input id="register-name" class="banner-login-input" type="text" name="name" placeholder="輸入姓名"/>
+                <input id="register-email" class="banner-login-input" type="text" name="email" placeholder="輸入電子信箱"/>
+                <input id="register-password" class="banner-login-input" type="text" name="password" placeholder="輸入密碼"/>
+                <button id="register-form-button" class="banner-login-button">註冊新帳戶</button>
+                <div id="register-success" class="banner-login-alert-ok">註冊成功，請登入系統</div>
+                <div id="email-is-used" class="banner-login-alert-error">Email已註冊過帳戶</div>
+                <div id="to-register" class="banner-login-register-button" onclick="switchToLoginForm()">已經有帳戶了？點此登入</div>
+            </form>
         </div>
         <div class="main-border">
             <div id="main-container" class="attraction-main-container">

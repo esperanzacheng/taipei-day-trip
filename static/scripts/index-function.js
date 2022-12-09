@@ -66,31 +66,11 @@ async function loadAttraction(curUrl, curPage, curKeyword) {
         }
         return data;
     })
-
     .catch(error => {
         return error;
     })
-
     nextPage = response["nextPage"];
 }
-
-loadAttraction(curUrl, curPage);
-window.addEventListener("scroll", () => {
-    let scrolledHeight = window.innerHeight + Math.ceil(document.documentElement.scrollTop); // scrolled height
-    let viewHeight = document.body.offsetHeight; // total height of the browser
-    // if (scrolled height >= total height of the browser) && (nextPage is a valid number), then load next page
-    if (scrolledHeight >= viewHeight && !isNaN(nextPage)) {
-        curPage = nextPage;
-        const searchBar = document.getElementById("search-bar");
-        let keyword = searchBar[0].value;
-        // see if there is keyword in the search bar
-        if (searchBar[0].value) {
-            loadAttraction(curUrl, curPage, keyword);
-        } else {
-            loadAttraction(curUrl, curPage);
-        }
-    }
-})
 
 function ajax() {
     let url = "/api/user/auth";
@@ -114,9 +94,28 @@ function ajax() {
     })
 }
 
-// after the window is loaded, activate the search bar event listener (submit)
-window.onload = function(){
-    ajax();
+// scroll to load more next page
+function scrollEvent() {
+    window.addEventListener("scroll", () => {
+        let scrolledHeight = window.innerHeight + Math.ceil(document.documentElement.scrollTop); // scrolled height
+        let viewHeight = document.body.offsetHeight; // total height of the browser
+        // if (scrolled height >= total height of the browser) && (nextPage is a valid number), then load next page
+        if (scrolledHeight >= viewHeight && !isNaN(nextPage)) {
+            curPage = nextPage;
+            const searchBar = document.getElementById("search-bar");
+            let keyword = searchBar[0].value;
+            // see if there is keyword in the search bar
+            if (searchBar[0].value) {
+                loadAttraction(curUrl, curPage, keyword);
+            } else {
+                loadAttraction(curUrl, curPage);
+            }
+        }
+    })
+}
+
+// activate the search bar event listener (submit)
+function searchBarEvent() {
     const searchBar = document.getElementById("search-bar");
     searchBar.addEventListener("submit", (e) => {
         e.preventDefault();
@@ -131,9 +130,11 @@ window.onload = function(){
         curPage = 0;
         curUrl = "/api/attractions?page=";
         loadAttraction(curUrl, curPage, keyword);
-    })    
-    
-    // event listener - to pop out category menu if user click the search bar
+    })  
+}
+
+// event listener - to pop out category menu if user click the search bar
+function catMenuEvent() {
     const formInput = document.getElementById("form-input");
     formInput.addEventListener("click", (e) => {
         e.preventDefault();
@@ -167,17 +168,6 @@ window.onload = function(){
             }
         })
     })   
-    userRegister();
-    userLogin();
-    logOut();
-}
-
-// click anywhere to close the search bar
-window.onclick = function(){
-    if (document.getElementById("banner-form-dropdown")) {
-        let form = document.getElementById("banner-form");
-        form.removeChild(form.lastChild);   
-    }
 }
 
 // register user
@@ -275,7 +265,7 @@ function logOut() {
         })
     })
 }
-   
+
 // select category in banner search bar
 function selectCat(text) {
     const searchBar = document.getElementById("form-input");
@@ -336,5 +326,22 @@ function removeAlert() {
     }
 }
 
-// export {showLoginForm};
+loadAttraction(curUrl, curPage);
+scrollEvent();
+// after the window is loaded, activate the search bar event listener (submit)
+window.onload = function(){
+    ajax();
+    searchBarEvent();
+    catMenuEvent();
+    userRegister();
+    userLogin();
+    logOut();
+}
 
+// click anywhere to close the search bar
+window.onclick = function(){
+    if (document.getElementById("banner-form-dropdown")) {
+        let form = document.getElementById("banner-form");
+        form.removeChild(form.lastChild);   
+    }
+}
