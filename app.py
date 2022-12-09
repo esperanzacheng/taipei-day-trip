@@ -14,6 +14,7 @@ app.config["JSON_AS_ASCII"]=False
 app.config['JSON_SORT_KEYS']=False
 app.config["TEMPLATES_AUTO_RELOAD"]=True
 app.config["SECRET_KEY"]=os.getenv("secretkey")
+print()
 
 # Pages
 @app.route("/")
@@ -222,7 +223,10 @@ def user_login():
 				print("enter else1")
 				expiredLength = datetime.datetime.utcnow() + datetime.timedelta(days=7)
 				print("enter else2")
-				token = jwt.encode({"id": my_result[0], "exp": expiredLength}, os.getenv("secretkey"))
+				token = jwt.encode({"id": my_result[0], "exp": expiredLength}, os.getenv("secretkey"), algorithms="HS256")
+				print(token)
+				token2 = jwt.encode({"id": my_result[0], "exp": expiredLength}, os.getenv("secretkey"))
+				print(token2)
 				print("before")
 				@after_this_request
 				def set_cookie(resp):
