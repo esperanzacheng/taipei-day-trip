@@ -13,8 +13,8 @@ app=Flask(__name__)
 app.config["JSON_AS_ASCII"]=False
 app.config['JSON_SORT_KEYS']=False
 app.config["TEMPLATES_AUTO_RELOAD"]=True
-app.config["SECRET_KEY"]=os.getenv("secretkey")
-print()
+secretkey = os.getenv("secretkey")
+# app.config["SECRET_KEY"]=os.getenv("secretkey")
 
 # Pages
 @app.route("/")
@@ -171,7 +171,7 @@ def token_auth():
 	if not token:
 		return (jsonify(error = True, message = "token is missing"), 403)
 	try:
-		data = jwt.decode(token, os.getenv("secretkey"), algorithms="HS256")
+		data = jwt.decode(token, secretkey, algorithms="HS256")
 		return data["id"]
 	except:
 		return (jsonify(error = True, message = "token is invalid"), 403)
@@ -185,7 +185,7 @@ def user_auth():
 	if not token:
 		return (jsonify(data = None), 200)
 	try:
-		data = jwt.decode(token, os.getenv("secretkey"), algorithms="HS256")
+		data = jwt.decode(token, secretkey, algorithms="HS256")
 		user_id = data["id"]
 		if user_id:
 			my_query = "SELECT id, name, email FROM User WHERE id = %s"
@@ -213,25 +213,15 @@ def user_login():
 			my_query = "SELECT id, name from User WHERE email = %s AND password = %s;"
 			my_cursor.execute(my_query, (email, password))
 			my_result = my_cursor.fetchone()
-			print("try before if")
 			if my_result == None:
-				print("enter result == none")
 				return (jsonify(error = True, message = "info is wrong"), 400)
 			else:
-				print("enter else1")
 				expiredLength = datetime.datetime.utcnow() + datetime.timedelta(days=7)
-				print("enter else2")
-				token = jwt.encode({"id": my_result[0], "exp": expiredLength}, os.getenv("secretkey"), algorithm="HS256")
-				print(token)
-				token2 = jwt.encode({"id": my_result[0], "exp": expiredLength}, os.getenv("secretkey"))
-				print(token2)
-				print("before")
+				token = jwt.encode({"id": my_result[0], "exp": expiredLength}, secretkey, algorithm="HS256")
 				@after_this_request
 				def set_cookie(resp):
-					print("after1")
 					resp = make_response((jsonify(ok = True), 200))
 					resp.set_cookie(key="token", value=token, expires=expiredLength, httponly=True)
-					print("after2")
 					return resp
 				return (jsonify(ok = True), 200)
 		except:
