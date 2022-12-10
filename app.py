@@ -183,6 +183,8 @@ def user_auth():
 	connection_object = connection_pool.get_connection()
 	my_cursor = connection_object.cursor()
 	if not token:
+		my_cursor.close()
+		connection_object.close()
 		return (jsonify(data = None), 200)
 	try:
 		data = jwt.decode(token, secretkey, algorithms="HS256")
