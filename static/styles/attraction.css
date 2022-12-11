@@ -347,7 +347,7 @@ img.slide {
     justify-content: center;
     border: none;
     opacity: 0.8;
-    z-index: 100;
+    z-index: 50;
 }
 
 .slide-button-right {
@@ -361,7 +361,7 @@ img.slide {
     justify-content: center;
     border: none;
     opacity: 0.8;
-    z-index: 100;
+    z-index: 50;
 }
 
 ul.slides {
@@ -378,7 +378,7 @@ ul.slides input[type="radio"] {
     -webkit-appearance: none;
     appearance: none;
     position: relative;
-    z-index: 100;
+    z-index: 50;
     margin: -1px;
     background-color: #FFFFFF;
     -webkit-transform: scale(0.6);

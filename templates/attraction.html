@@ -1,19 +1,11 @@
-<!DOCTYPE html>
-<html>
-    <head>
-        <meta name="viewport", content="width=device-width, initial-scale=1.0" />
-        <meta charset="utf-8">
-        <title>台北一日遊 - 景點</title>
-        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/index.css')}}" />
-        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/attraction.css')}}" />
-        <script src="{{ url_for('static', filename='scripts/attraction.js')}}"></script>
-    </head>
-    <body>
-        <div class="head-container">
-            <a id="home-button" class="head-item1">台北一日遊</a>
-            <div class="head-item2">預定行程</div>
-            <div class="head-item3">登入/註冊</div>
-        </div>
+{% extends "base.html" %}
+{% block title %}台北一日遊 - 景點{% endblock title %}
+{% block stylesheet %}<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/attraction.css')}}" />{% endblock stylesheet %}
+{% block script %}
+<script src="{{ url_for('static', filename='scripts/attraction.js')}}"></script>
+<script src="{{ url_for('static', filename='scripts/login-function.js')}}"></script>
+{% endblock script %}
+        {% block main %}
         <div class="main-border">
             <div id="main-container" class="attraction-main-container">
                 <div id="img-frame" class="attraction-main-img">
@@ -43,6 +35,4 @@
         </div>
         <div class="detail-container" id="detail-container">
         </div>
-        <div class="footer" id="footer">COPYRIGHT © 2021 台北一日遊</div>
-    </body>
-</html>
+        {% endblock main %}

@@ -131,15 +131,8 @@ function slideRight(e) {
     }
 }
 
-window.onload = function() {
-    // create link to the home page with head item-1
-    let homeButton = document.getElementById("home-button");
-    let thisDomain = window.location.hostname;
-    let thisProtocol = window.location.protocol;
-    let homeUrl = thisProtocol + "//" + thisDomain + ":3000";
-    homeButton.setAttribute("href", homeUrl);
-
-    // set the html date input with min == today & max == a year from today
+// set the html date input with min == today & max == a year from today
+function setCalendar() {
     let dateSelector = document.getElementById("date-selector");
     let today = new Date();
     let aYearFromNow = new Date();
@@ -150,7 +143,13 @@ window.onload = function() {
     dateSelector.max = aYearFromNowDate;
 }
 
+window.onload = function() {
+    ajax();
+    homeLink();
+    setCalendar()
+    userRegister();
+    userLogin();
+    logOut();
+}
+
 fetchData(thisId);
-
-
-

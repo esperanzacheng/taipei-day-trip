@@ -1,11 +1,20 @@
 from flask import *
 import mysql.connector
 import json
+import jwt
+import datetime
+from functools import wraps
+import requests
+import os
+from dotenv import load_dotenv
+load_dotenv()
 
 app=Flask(__name__)
 app.config["JSON_AS_ASCII"]=False
 app.config['JSON_SORT_KEYS']=False
 app.config["TEMPLATES_AUTO_RELOAD"]=True
+secretkey = os.getenv("secretkey")
+# app.config["SECRET_KEY"]=os.getenv("secretkey")
 
 # Pages
 @app.route("/")
@@ -28,7 +37,7 @@ connection_pool = mysql.connector.pooling.MySQLConnectionPool(
     pool_reset_session = True,
     host = "127.0.0.1",
     user = "root",
-    password = "Alien@9118",
+    password = os.getenv("mysql-password"),
     database = "tpe_trip"
 )
 
@@ -126,6 +135,115 @@ def api_categories():
 	finally:
 		my_cursor.close()
 		connection_object.close()
+
+@app.route("/api/user", methods=["POST"])
+def user_signup():
+	name = request.json["name"]
+	email = request.json["email"]
+	password = request.json["password"]
+	if name and email and password:
+		try:
+			connection_object = connection_pool.get_connection()
+			my_cursor = connection_object.cursor()
+			check_email_query = "SELECT id FROM User WHERE email = %s"
+			my_cursor.execute(check_email_query, [email])
+			check_email_result = my_cursor.fetchone()
+			if check_email_result == None: 
+				insert_query = "INSERT INTO User (name, email, password) VALUES (%s, %s, %s);"
+				my_cursor.execute(insert_query, (name, email, password))
+				connection_object.commit()	
+			else:
+				return (jsonify(error = True, message = "this email is used"), 400)
+		except:
+			return (jsonify(error = True, message = "internal server error"), 500)
+		finally:
+			my_cursor.close()
+			connection_object.close()
+		return (jsonify(ok = True), 200)
+
+	else:
+		return (jsonify(error = True, message = "the data is not filled out correctly"), 400)
+
+
+def token_auth():
+	token = request.cookies.get("token")
+	print(token)
+	if not token:
+		return (jsonify(error = True, message = "token is missing"), 403)
+	try:
+		data = jwt.decode(token, secretkey, algorithms="HS256")
+		return data["id"]
+	except:
+		return (jsonify(error = True, message = "token is invalid"), 403)
+
+
+@app.route("/api/user/auth", methods=["GET"])
+def user_auth():
+	token = request.cookies.get("token")
+	connection_object = connection_pool.get_connection()
+	my_cursor = connection_object.cursor()
+	if not token:
+		my_cursor.close()
+		connection_object.close()
+		return (jsonify(data = None), 200)
+	try:
+		data = jwt.decode(token, secretkey, algorithms="HS256")
+		user_id = data["id"]
+		if user_id:
+			my_query = "SELECT id, name, email FROM User WHERE id = %s"
+			my_cursor.execute(my_query, [user_id])
+			my_result = my_cursor.fetchone()
+			row_headers = [x[0] for x in my_cursor.description]
+			json_result = dict(zip(row_headers, my_result))
+			return (jsonify(data = json_result), 200)
+	except SyntaxError as e:
+		return (jsonify(error = True, message = "token is invalid"), 403)
+	except:
+		return (jsonify(error = True, message = "internal server error"), 500)
+	finally:
+		my_cursor.close()
+		connection_object.close()
+
+@app.route("/api/user/auth", methods=["PUT"])
+def user_login():
+	email = request.json["email"]
+	password = request.json["password"]
+	if email and password:
+		try: 
+			connection_object = connection_pool.get_connection()
+			my_cursor = connection_object.cursor()
+			my_query = "SELECT id, name from User WHERE email = %s AND password = %s;"
+			my_cursor.execute(my_query, (email, password))
+			my_result = my_cursor.fetchone()
+			if my_result == None:
+				return (jsonify(error = True, message = "info is wrong"), 400)
+			else:
+				expiredLength = datetime.datetime.utcnow() + datetime.timedelta(days=7)
+				token = jwt.encode({"id": my_result[0], "exp": expiredLength}, secretkey, algorithm="HS256")
+				@after_this_request
+				def set_cookie(resp):
+					resp = make_response((jsonify(ok = True), 200))
+					resp.set_cookie(key="token", value=token, expires=expiredLength, httponly=True)
+					return resp
+				return (jsonify(ok = True), 200)
+		except:
+			return (jsonify(error = True, message = "internal server error"), 500)
+		finally:
+			my_cursor.close()
+			connection_object.close()
+	else:
+		return (jsonify(error = True, message = "info not filled"), 400)
+
+@app.route("/api/user/auth", methods=["DELETE"])
+def user_logout():
+	try:
+		@after_this_request
+		def delete_cookie(resp):			
+			resp.set_cookie(key="token", max_age=0)
+			return resp
+		return (jsonify(ok = True), 200)
+	except:
+		return (jsonify(error = True, message = "internal server error"), 500)
 
 if __name__ == "__main__":
     app.run(host = "0.0.0.0", port = 3000, debug = True)

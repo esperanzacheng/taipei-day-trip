@@ -66,40 +66,34 @@ async function loadAttraction(curUrl, curPage, curKeyword) {
         }
         return data;
     })
-
     .catch(error => {
         return error;
     })
-
     nextPage = response["nextPage"];
 }
 
-function selectCat(text) {
-    const searchBar = document.getElementById("form-input");
-    searchBar.value = text;
-    searchBar.setAttribute("placeholder", text);
+// scroll to load more next page
+function scrollEvent() {
+    window.addEventListener("scroll", () => {
+        let scrolledHeight = window.innerHeight + Math.ceil(document.documentElement.scrollTop); // scrolled height
+        let viewHeight = document.body.offsetHeight; // total height of the browser
+        // if (scrolled height >= total height of the browser) && (nextPage is a valid number), then load next page
+        if (scrolledHeight >= viewHeight && !isNaN(nextPage)) {
+            curPage = nextPage;
+            const searchBar = document.getElementById("search-bar");
+            let keyword = searchBar[0].value;
+            // see if there is keyword in the search bar
+            if (searchBar[0].value) {
+                loadAttraction(curUrl, curPage, keyword);
+            } else {
+                loadAttraction(curUrl, curPage);
+            }
+        }
+    })
 }
 
-loadAttraction(curUrl, curPage);
-window.addEventListener("scroll", () => {
-    let scrolledHeight = window.innerHeight + Math.ceil(document.documentElement.scrollTop); // scrolled height
-    let viewHeight = document.body.offsetHeight; // total height of the browser
-    // if (scrolled height >= total height of the browser) && (nextPage is a valid number), then load next page
-    if (scrolledHeight >= viewHeight && !isNaN(nextPage)) {
-        curPage = nextPage;
-        const searchBar = document.getElementById("search-bar");
-        let keyword = searchBar[0].value;
-        // see if there is keyword in the search bar
-        if (searchBar[0].value) {
-            loadAttraction(curUrl, curPage, keyword);
-        } else {
-            loadAttraction(curUrl, curPage);
-        }
-    }
-})
-
-// after the window is loaded, activate the search bar event listener (submit)
-window.onload = function(){
+// activate the search bar event listener (submit)
+function searchBarEvent() {
     const searchBar = document.getElementById("search-bar");
     searchBar.addEventListener("submit", (e) => {
         e.preventDefault();
@@ -114,9 +108,11 @@ window.onload = function(){
         curPage = 0;
         curUrl = "/api/attractions?page=";
         loadAttraction(curUrl, curPage, keyword);
-    })    
-    
-    // event listener - to pop out category menu if user click the search bar
+    })  
+}
+
+// event listener - to pop out category menu if user click the search bar
+function catMenuEvent() {
     const formInput = document.getElementById("form-input");
     formInput.addEventListener("click", (e) => {
         e.preventDefault();
@@ -148,9 +144,28 @@ window.onload = function(){
                 dropDownItem.textContent = text;
                 dropDown.appendChild(dropDownItem); 
             }
-
         })
     })   
+}
+
+// select category in banner search bar
+function selectCat(text) {
+    const searchBar = document.getElementById("form-input");
+    searchBar.value = text;
+    searchBar.setAttribute("placeholder", text);
+}
+
+loadAttraction(curUrl, curPage);
+scrollEvent();
+
+window.onload = function() {
+    searchBarEvent();
+    catMenuEvent();
+    ajax();
+    homeLink();
+    userRegister();
+    userLogin();
+    logOut();
 }
 
 // click anywhere to close the search bar
@@ -159,4 +174,4 @@ window.onclick = function(){
         let form = document.getElementById("banner-form");
         form.removeChild(form.lastChild);   
     }
-}
+}   
