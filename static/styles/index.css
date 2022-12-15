@@ -22,7 +22,7 @@ html,body{
     place-items: center start;
     margin: auto;
     max-width: 1200px;
-    grid-template-columns: 190px auto 80px 90px;
+    grid-template-columns: 180px auto 80px 90px;
     grid-template-rows: 54px;
     position: relative;
 }
@@ -32,7 +32,7 @@ html,body{
     font-size: 30px;
     font-weight: 700;
     color: #448899;
-    padding-left: 10px;
+    place-self: center;
     text-decoration: none;
 }
 
@@ -41,6 +41,9 @@ html,body{
     font-size: 16px;
     font-weight: 500;
     color: #666666;
+    text-decoration: none;
+    place-self: center;
+    cursor: pointer;
 }
 
 .head-item3{
@@ -50,6 +53,7 @@ html,body{
     color: #666666;
     cursor: pointer;
     display: none;
+    place-self: center;
 }
 
 .head-item4{
@@ -59,6 +63,7 @@ html,body{
     color: #666666;
     cursor: pointer;
     display: none;
+    place-self: center;
 }
 
 .banner-container{
@@ -70,7 +75,6 @@ html,body{
     background-image: url("../images/welcome.png");
     margin-bottom: 40px;
     background-size: cover;
-    /* position: relative; */
 }
 
 .pop-up-login-container {
@@ -201,6 +205,7 @@ input{
     color: #757575;
     font-weight: 700;
     font-size: 16px;
+    outline: none;
 }
 
 .banner-form{
@@ -240,6 +245,7 @@ input{
     border-top-right-radius: 5px;
     border-bottom-right-radius: 5px;
     position: relative;
+    cursor: pointer;
 }
 
 .banner-form-icon{
@@ -259,6 +265,7 @@ input{
     box-shadow: 0px 0px 20px #AABBCC;
     background-color: #FFFFFF;
     border-radius: 5px;
+    cursor: pointer;
 }
 
 .banner-form-dropdown-item{
@@ -358,6 +365,12 @@ input{
     display: grid;
     place-items: center;
     background-color: #757575;
+
+    /* position: fixed; */
+    /* bottom: 0; */
+    /* width: 100%; */
+    /* position: absolute; */
+    /* top: 90%; */
 }
 
 img{
@@ -384,7 +397,7 @@ img{
         font-size: 30px;
         font-weight: 700;
         color: #448899;
-        padding-left: 20px;
+        place-self: center;
     }
 
     .banner-container{

@@ -4,6 +4,27 @@ let nextPage;
 let curKeyword;
 let thisUrl = window.location.href;
 
+loadAttraction(curUrl, curPage);
+scrollEvent(); 
+
+window.onload = function() {
+    ajax();
+    searchBarEvent();
+    catMenuEvent();
+    homeLink();
+    userRegister();
+    userLogin();
+    userLogOut();
+}
+
+// click anywhere to close the search bar
+window.onclick = function(){
+    if (document.getElementById("banner-form-dropdown")) {
+        const form = document.getElementById("banner-form");
+        form.removeChild(form.lastChild);   
+    }
+}   
+
 // create function to load attractions data in main
 async function loadAttraction(curUrl, curPage, curKeyword) {    
     let condition;
@@ -27,8 +48,8 @@ async function loadAttraction(curUrl, curPage, curKeyword) {
     .then(data => {
         
         // append attraction data into main
-        let container = document.getElementById("main"); 
-        let newContainer = document.createElement("div");
+        const container = document.getElementById("main"); 
+        const newContainer = document.createElement("div");
         newContainer.classList.add("main-container");
         container.appendChild(newContainer);
 
@@ -41,19 +62,19 @@ async function loadAttraction(curUrl, curPage, curKeyword) {
             container.classList.remove("main-alert");
             container.classList.add("main");
             for (let i = 0; i < 12; i++) {
-                let newItem = document.createElement("a");
+                const newItem = document.createElement("a");
                 newItem.classList.add("main-item");
                 newItem.setAttribute("href", thisUrl + "attraction/" + data["data"][i]["id"])
-                let newItemImg = document.createElement("img");
+                const newItemImg = document.createElement("img");
                 newItemImg.classList.add("main-item-img");
                 newItemImg.src = data["data"][i]["images"][0];
-                let newItemName = document.createElement("div");
+                const newItemName = document.createElement("div");
                 newItemName.classList.add("main-item-name");
                 newItemName.textContent = data["data"][i]["name"];
-                let newItemMrt = document.createElement("div");
+                const newItemMrt = document.createElement("div");
                 newItemMrt.classList.add("main-item-mrt");
                 newItemMrt.textContent = data["data"][i]["mrt"];
-                let newItemCat = document.createElement("div");
+                const newItemCat = document.createElement("div");
                 newItemCat.classList.add("main-item-cat");
                 newItemCat.textContent = data["data"][i]["category"];
             
@@ -98,7 +119,7 @@ function searchBarEvent() {
     searchBar.addEventListener("submit", (e) => {
         e.preventDefault();
         e.stopPropagation();
-        let container = document.getElementById("main"); 
+        const container = document.getElementById("main"); 
         // remove data in main after new condition if there are attraction data in main
         while (container.firstChild) {
             container.removeChild(container.firstChild);
@@ -106,7 +127,6 @@ function searchBarEvent() {
         // let keyword = searchBar[0].value; // get keyword in search bar
         let keyword = searchBar[0].value;
         curPage = 0;
-        curUrl = "/api/attractions?page=";
         loadAttraction(curUrl, curPage, keyword);
     })  
 }
@@ -130,20 +150,23 @@ function catMenuEvent() {
         .then(data => {
             // get menu element by id
             let clist = data["data"];
-            let form = document.getElementById("banner-form");
-            let dropDown = document.createElement("div");
+            const form = document.getElementById("banner-form");
+            const dropDown = document.createElement("div");
             dropDown.classList.add("banner-form-dropdown");
             dropDown.setAttribute("id", "banner-form-dropdown");
             form.appendChild(dropDown);
             // append category data into the menu
             for (let i = 0; i <= clist.length; i++) {
-                let dropDownItem = document.createElement("div");
+                const dropDownItem = document.createElement("div");
                 let text = clist[i];
                 dropDownItem.classList.add("banner-form-dropdown-item");
                 dropDownItem.setAttribute("onclick", `selectCat(\'' + "${text}" + '\')`);
                 dropDownItem.textContent = text;
                 dropDown.appendChild(dropDownItem); 
             }
+        })
+        .catch((error) => {
+            return error;
         })
     })   
 }
@@ -152,26 +175,4 @@ function catMenuEvent() {
 function selectCat(text) {
     const searchBar = document.getElementById("form-input");
     searchBar.value = text;
-    searchBar.setAttribute("placeholder", text);
 }
-
-loadAttraction(curUrl, curPage);
-scrollEvent();
-
-window.onload = function() {
-    searchBarEvent();
-    catMenuEvent();
-    ajax();
-    homeLink();
-    userRegister();
-    userLogin();
-    logOut();
-}
-
-// click anywhere to close the search bar
-window.onclick = function(){
-    if (document.getElementById("banner-form-dropdown")) {
-        let form = document.getElementById("banner-form");
-        form.removeChild(form.lastChild);   
-    }
-}   

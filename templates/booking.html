@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}台北一日遊 - 預定行程{% endblock title %}
+{% block stylesheet %}
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/attraction.css')}}" />
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/booking.css')}}" />
+{% endblock stylesheet %}
+{% block script %}
+<script src="{{ url_for('static', filename='scripts/booking.js')}}"></script>
+<script src="{{ url_for('static', filename='scripts/login-function.js')}}"></script>
+{% endblock script %}
+{% block main %}
+    <div class="main-border">
+        <div class="booking-main-container-box">
+            <div id="main-container" class="booking-main-container">
+                <div id="main-greeting" class="booking-main-greeting">您好，<span id="user-name"></span>，待預訂的行程如下：</div>
+            </div>
+        </div>
+        <div id="contact-info" class="info-container">
+            <form class="info-form-container">
+                <div class="info-form-headline">您的聯絡資訊</div>
+                <div class="info-form-head">聯絡姓名：</div>
+                <input class="info-form-input" type="text" />
+                <div class="info-form-head">連絡信箱：</div>
+                <input class="info-form-input" type="email" />
+                <div class="info-form-head">手機號碼：</div>
+                <input class="info-form-input" type="tel" pattern="[0-9]{4}-[0-9]{3}-[0-9]{3}" />
+                <div class="info-form-note">請保持手機暢通，準時到達，導覽人員將用手機與您聯繫，務必留下正確的聯絡方式。</div>
+            </form>
+        </div>
+        <div id="payment-info" class="info-container">
+            <form class="info-form-container">
+                <div class="info-form-headline">信用卡付款資訊</div>
+                <div class="info-form-head">卡片號碼：</div>
+                <input class="info-form-input" type="tel" inputmode="numeric" pattern="[0-9\s]{13,19}" autocomplete="cc-number" maxlength="19" placeholder="**** **** **** ****" data-pattern-validate/>
+                <div class="info-form-head">過期時間：</div>
+                <div class="credit-card-date">
+                    <input class="credit-card-date-input" maxlength="2" pattern="[0-9]*" inputmode="numerical" placeholder="MM" type="text" data-pattern-validate/>
+                    <input class="credit-card-date-input" maxlength="2" pattern="[0-9]*" inputmode="numerical" placeholder="YY" type="text" data-pattern-validate/>
+                </div>           
+                <div class="info-form-head">驗證密碼：</div>
+                <input class="info-form-input" maxlength="3" pattern="[0-9]*" inputmode="numerical" placeholder="CVV" type="text" data-pattern-validate/>
+            </form>
+        </div>
+        <div id="checkout-info" class="info-container">
+            <div class="checkout-container">
+                <div id="checkout-total" class="booking-main-info-head"></div>
+                <button type="submit" class="checkout-button">確認訂購並付款</button>
+            </div>
+        </div>
+    </div>
+    
+{% endblock main %}
