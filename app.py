@@ -294,8 +294,7 @@ def booking_post():
 		my_cursor.execute(check_query, (user_id, date))
 		check_result = my_cursor.fetchone()
 		if not check_result:
-			print("here")
-			book_query = "INSERT INTO Booking (attr_id, date, time, price, user_id) VALUES (%s, %s, %s, %s, %s);"
+			book_query = "REPLACE INTO Booking (attr_id, date, time, price, user_id) VALUES (%s, %s, %s, %s, %s);"
 			my_cursor.execute(book_query, (attraction_id, date, time, price, user_id))
 			connection_object.commit()
 			return (jsonify(ok = True), 200)
