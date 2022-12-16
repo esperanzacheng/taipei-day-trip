@@ -7,6 +7,14 @@ function homeLink() {
     homeButton.setAttribute("href", homeUrl);
 }
 
+function bookLink() {
+    let bookButton = document.getElementById("booking-checkout");
+    let thisDomain = window.location.hostname;
+    let thisProtocol = window.location.protocol;
+    let homeUrl = thisProtocol + "//" + thisDomain + ":3000/booking";
+    bookButton.setAttribute("href", homeUrl);
+}
+
 // register user
 function userRegister() {
     const registerButton = document.getElementById("register-form-button");
@@ -82,7 +90,7 @@ function userLogin() {
 }
 
 // log out and delete token
-function logOut() {
+function userLogOut() {
     const logoutButton = document.getElementById("log-out-button");
     logoutButton.addEventListener("click", (e) => {
         e.preventDefault();
@@ -118,10 +126,13 @@ function ajax() {
         if (data["data"]) {
             logOut.style.display = "block";
             logIn.style.display = "none";
+            bookLink();
             
         } else {
             logOut.style.display = "none";
             logIn.style.display = "block";
+            let bookButton = document.getElementById("booking-checkout");
+            bookButton.setAttribute("onclick", "showLoginForm()");
         }
     })
 }

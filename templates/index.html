@@ -5,22 +5,22 @@
 <script src="{{ url_for('static', filename='scripts/index.js')}}"></script>
 <script src="{{ url_for('static', filename='scripts/login-function.js')}}"></script>
 {% endblock script %}
-        {% block main %}
-        <div class="banner-container" id="banner">
-            <div class="banner-item1">輕鬆享受台北一日悠閒</div>
-            <div class="banner-item2">探索每個角落，體驗城市的深度旅遊行程</div>
-            <div id="banner-form" class="banner-form">
-                <form id="search-bar" method="get" class="banner-form-search-bar">
-                    <input id="form-input" class="banner-form-search-bar"
-                    type="text"
-                    name="keyword"
-                    placeholder="輸入景點名稱查詢" 
-                    />
-                <button class="banner-form-icon-bg" type="submit">
-                    <img class="banner-form-icon" src="../static/images/icon_search.png" />
-                </button>
-                </form>
-            </div>
-        </div>
-        <div class="main" id="main"></div>
-        {% endblock main %}
+{% block main %}
+<div class="banner-container" id="banner">
+    <div class="banner-item1">輕鬆享受台北一日悠閒</div>
+    <div class="banner-item2">探索每個角落，體驗城市的深度旅遊行程</div>
+    <div id="banner-form" class="banner-form">
+        <form id="search-bar" method="get" class="banner-form-search-bar">
+            <input id="form-input" class="banner-form-search-bar"
+            type="text"
+            name="keyword"
+            placeholder="輸入景點名稱查詢" 
+            />
+        <button class="banner-form-icon-bg" type="submit">
+            <img class="banner-form-icon" src="../static/images/icon_search.png" />
+        </button>
+        </form>
+    </div>
+</div>
+<div class="main" id="main"></div>
+{% endblock main %}

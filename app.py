@@ -14,7 +14,19 @@ app.config["JSON_AS_ASCII"]=False
 app.config['JSON_SORT_KEYS']=False
 app.config["TEMPLATES_AUTO_RELOAD"]=True
 secretkey = os.getenv("secretkey")
-# app.config["SECRET_KEY"]=os.getenv("secretkey")
+
+def token_auth(func):
+	@wraps(func)
+	def auth(*args, **kwargs):
+		token = request.cookies.get("token")
+		if not token:
+			return (jsonify(error = True, message = "token is missing"), 403)
+		try:
+			data = jwt.decode(token, secretkey, algorithms="HS256")
+		except:
+			return (jsonify(error = True, message = "token is invalid"), 403)
+		return func(*args, **kwargs)
+	return auth
 
 # Pages
 @app.route("/")
@@ -165,28 +177,17 @@ def user_signup():
 		return (jsonify(error = True, message = "the data is not filled out correctly"), 400)
 
 
-def token_auth():
-	token = request.cookies.get("token")
-	print(token)
-	if not token:
-		return (jsonify(error = True, message = "token is missing"), 403)
-	try:
-		data = jwt.decode(token, secretkey, algorithms="HS256")
-		return data["id"]
-	except:
-		return (jsonify(error = True, message = "token is invalid"), 403)
 
 
 @app.route("/api/user/auth", methods=["GET"])
+@token_auth
 def user_auth():
-	token = request.cookies.get("token")
-	connection_object = connection_pool.get_connection()
-	my_cursor = connection_object.cursor()
-	if not token:
-		my_cursor.close()
-		connection_object.close()
-		return (jsonify(data = None), 200)
 	try:
+		connection_object = connection_pool.get_connection()
+		my_cursor = connection_object.cursor()
+		token = request.cookies.get("token")
+		if not token:
+			return (jsonify(data = None), 200)
 		data = jwt.decode(token, secretkey, algorithms="HS256")
 		user_id = data["id"]
 		if user_id:
@@ -196,8 +197,6 @@ def user_auth():
 			row_headers = [x[0] for x in my_cursor.description]
 			json_result = dict(zip(row_headers, my_result))
 			return (jsonify(data = json_result), 200)
-	except SyntaxError as e:
-		return (jsonify(error = True, message = "token is invalid"), 403)
 	except:
 		return (jsonify(error = True, message = "internal server error"), 500)
 	finally:
@@ -244,6 +243,90 @@ def user_logout():
 		return (jsonify(ok = True), 200)
 	except:
 		return (jsonify(error = True, message = "internal server error"), 500)
+
+@app.route("/api/booking", methods=["GET"])
+@token_auth
+def booking_get():
+	try:
+		token = request.cookies.get("token")
+		data = jwt.decode(token, secretkey, algorithms="HS256")
+		user_id = data["id"]
+		connection_object = connection_pool.get_connection()
+		my_cursor = connection_object.cursor()
+		my_query = "SELECT Attraction.id, Attraction.name, Attraction.address, Attr_img.images, Booking.date, Booking.time, Booking.price \
+			FROM Attraction \
+			INNER JOIN Attr_img ON Attraction.id = Attr_img.attr_id \
+			INNER JOIN Booking ON Attraction.id = Booking.attr_id \
+			WHERE Booking.user_id = %s ORDER BY Booking.id DESC LIMIT 0,1;"
+		my_cursor.execute(my_query, [user_id])
+		my_result = my_cursor.fetchone()
+		if my_result  == None:
+			return (jsonify(data = None), 200)
+		else:
+			row_headers = [x[0] for x in my_cursor.description]
+			# convert the data format
+			attraction_header = [row_headers[0], row_headers[1], row_headers[2], "image"]
+			attraction_result = [my_result[0], my_result[1], my_result[2], my_result[3]]
+			json_attraction = dict(zip(attraction_header, attraction_result))
+			formatted_result = [json_attraction, my_result[4].strftime("%Y-%m-%d"), my_result[5], my_result[6]]
+			formatted_headers = ["attraction", row_headers[4], row_headers[5], row_headers[6]]
+			json_result = dict(zip(formatted_headers, formatted_result))
+			return (jsonify(data = json_result), 200)
+	except:
+		return (jsonify(error = True, message = "internal server error"), 500)
+	finally:
+		my_cursor.close()
+		connection_object.close()
+	
+@app.route("/api/booking", methods=["POST"])
+def booking_post():
+	try: 
+		connection_object = connection_pool.get_connection()
+		my_cursor = connection_object.cursor()
+		token = request.cookies.get("token")
+		data = jwt.decode(token, secretkey, algorithms="HS256")
+		user_id = data["id"]
+		attraction_id = request.json["attractionId"]
+		date = request.json["date"]
+		time = request.json["time"]
+		price = request.json["price"]
+		check_query = "SELECT * FROM Booking WHERE user_id = %s AND date = %s;"
+		my_cursor.execute(check_query, (user_id, date))
+		check_result = my_cursor.fetchone()
+		if not check_result:
+			book_query = "REPLACE INTO Booking (attr_id, date, time, price, user_id) VALUES (%s, %s, %s, %s, %s);"
+			my_cursor.execute(book_query, (attraction_id, date, time, price, user_id))
+			connection_object.commit()
+			return (jsonify(ok = True), 200)
+		else:
+			return (jsonify(error = True, message = "time slot conflict"), 400)
+	except (ValueError, IndexError, TypeError) as error:
+		return (jsonify(error = True, message = error.args[0]), 400)
+	except:
+		return (jsonify(error = True, message = "internal server error"), 500)
+	finally:
+		my_cursor.close()
+		connection_object.close()
+
+@app.route("/api/booking", methods=["DELETE"])
+def booking_delete():
+	try:
+		connection_object = connection_pool.get_connection()
+		my_cursor = connection_object.cursor()
+		token = request.cookies.get("token")
+		data = jwt.decode(token, secretkey, algorithms="HS256")
+		user_id = data["id"]
+		print(user_id)
+		my_query = "DELETE FROM Booking WHERE user_id = %s ORDER BY Booking.id DESC LIMIT 1;"
+		my_cursor.execute(my_query, [user_id])
+		connection_object.commit()
+		print("fine")
+		return (jsonify(ok = True), 200)
+	except:
+		return (jsonify(error = True, message = "internal server error"), 500)
+	finally:
+		my_cursor.close()
+		connection_object.close()
 
 if __name__ == "__main__":
     app.run(host = "0.0.0.0", port = 3000, debug = True)
