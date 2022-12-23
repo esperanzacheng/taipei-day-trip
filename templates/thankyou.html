@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}台北一日遊-完成付款{% endblock title %}
+{% block stylesheet %}
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/thankyou.css')}}" />
+{% endblock stylesheet %}
+{% block script %}
+<script src="{{ url_for('static', filename='scripts/thankyou.js')}}"></script>
+<script src="{{ url_for('static', filename='scripts/login-function.js')}}"></script>
+{% endblock script %}
+{% block main %}
+    <div class="thankyou-container">
+        <div class="thankyou-textbox">
+            <div id="order-head" class="thankyou-text"></div>
+            <div id="order-nb" class="thankyou-nb"></div>
+            <a id="order-text" class="thankyou-text"></a>
+        </div>
+        <a class="thankyou-mark-img-src" href="https://www.pupvine.com/">圖片來源：PupVine</a>
+    </div>
+{% endblock main %}

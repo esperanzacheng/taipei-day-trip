@@ -34,9 +34,9 @@ function loginCheck() {
 }
 
 // check login status and set username in greeting html item
-function getBooking() {
+async function getBooking() {
     let url = "/api/booking";
-    fetch(url, {
+    let response = await fetch(url, {
         method: "GET",
         credentials: "include",
         headers: {
@@ -119,10 +119,12 @@ function getBooking() {
             nonBookedText.textContent = "目前沒有任何待預訂的行程";
             mainContainer.appendChild(nonBookedText);
         }
+        return data;
     })
     .catch((error) => {
         console.log(error);
     })
+    attraction = response["data"];
 }
 
 function deleteBooking() {

@@ -1,0 +1,52 @@
+.thankyou-container{
+    display: grid;
+    place-items: center start;
+    width: 100%;
+    height: calc(100vh - 158px);
+    background: url("/static/images/thankyou.png") center;
+    background-size: cover;
+    margin-bottom: -10px;
+    position: relative;
+}
+
+.thankyou-mark-img-src{
+    position: absolute;
+    bottom: 5%;
+    right: 5%;
+    color: #ffffff;
+    font-weight: 500;
+    font-size: 9px;
+}
+
+.thankyou-textbox{
+    width: 45%;
+    height: 60%;
+    background-color: #ffffff;
+    opacity: 0.6;
+    margin-left: 8%;
+    display: grid;
+}
+
+.thankyou-text{
+    font-weight: 700;
+    font-size: 19px;
+    color: #535252;
+    margin-left: 10%;
+    margin-right: 10%;
+    place-self: center start;
+}
+
+.thankyou-nb{
+    font-weight: 700;
+    font-size: 16px;
+    color: #448899;
+    margin-left: 15%;
+    margin-right: 10%;
+    place-self: start;
+}
+
+@media (max-width: 600px) {
+    .thankyou-textbox{
+        width: 70%;
+    }
+}
