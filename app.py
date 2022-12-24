@@ -425,7 +425,6 @@ def orders_get(orderNumber):
 			return (jsonify(data = None), 200)
 		else:
 			row_headers = [x[0] for x in my_cursor.description]
-			print(my_result)
 
 			# format attraction data
 			attr_headers = [row_headers[12], row_headers[13], row_headers[14], "image"]
@@ -443,8 +442,8 @@ def orders_get(orderNumber):
 			contact_json = dict(zip(contact_headers, contact_result))
 			
 			# format overall data
-			formatted_headers = [row_headers[11], row_headers[1], "trip", "contact", "status"]
-			formatted_result = [my_result[11], my_result[1], trip_json, contact_json, my_result[9]]
+			formatted_headers = [row_headers[10], row_headers[1], "trip", "contact", "status"]
+			formatted_result = [my_result[10], my_result[1], trip_json, contact_json, my_result[11]]
 			formatted_json = dict(zip(formatted_headers, formatted_result))
 
 			return (jsonify(data = formatted_json), 200)
