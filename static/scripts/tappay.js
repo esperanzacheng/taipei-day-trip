@@ -1,4 +1,4 @@
-TPDirect.setupSDK(126968, "	app_NT7RusBZrRieGDPQ0KRdJlOYX10FXZqeJRM25KPTCplfUml1LwJu0OCYN2hl", 'sandbox');
+TPDirect.setupSDK(126968, "app_NT7RusBZrRieGDPQ0KRdJlOYX10FXZqeJRM25KPTCplfUml1LwJu0OCYN2hl", 'sandbox');
 
 let fields = {
     number: {
