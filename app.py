@@ -425,6 +425,7 @@ def orders_get(orderNumber):
 			return (jsonify(data = None), 200)
 		else:
 			row_headers = [x[0] for x in my_cursor.description]
+			print(my_result)
 
 			# format attraction data
 			attr_headers = [row_headers[12], row_headers[13], row_headers[14], "image"]
