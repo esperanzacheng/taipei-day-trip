@@ -7,6 +7,7 @@
 {% block script %}
 <script src="{{ url_for('static', filename='scripts/booking.js')}}"></script>
 <script src="{{ url_for('static', filename='scripts/login-function.js')}}"></script>
+<script src="https://js.tappaysdk.com/sdk/tpdirect/v5.14.0"></script>
 {% endblock script %}
 {% block main %}
     <div class="main-border">
@@ -19,34 +20,33 @@
             <form class="info-form-container">
                 <div class="info-form-headline">您的聯絡資訊</div>
                 <div class="info-form-head">聯絡姓名：</div>
-                <input class="info-form-input" type="text" />
+                <input id="contact-name" class="info-form-input" type="text" />
                 <div class="info-form-head">連絡信箱：</div>
-                <input class="info-form-input" type="email" />
+                <input id="contact-email" class="info-form-input" type="email" />
                 <div class="info-form-head">手機號碼：</div>
-                <input class="info-form-input" type="tel" pattern="[0-9]{4}-[0-9]{3}-[0-9]{3}" />
+                <input id="contact-phone" class="info-form-input" type="tel" maxlength="10" pattern="[0-9]*" placeholder="0912345678" data-pattern-validate/>
                 <div class="info-form-note">請保持手機暢通，準時到達，導覽人員將用手機與您聯繫，務必留下正確的聯絡方式。</div>
             </form>
         </div>
         <div id="payment-info" class="info-container">
             <form class="info-form-container">
                 <div class="info-form-headline">信用卡付款資訊</div>
-                <div class="info-form-head">卡片號碼：</div>
-                <input class="info-form-input" type="tel" inputmode="numeric" pattern="[0-9\s]{13,19}" autocomplete="cc-number" maxlength="19" placeholder="**** **** **** ****" data-pattern-validate/>
-                <div class="info-form-head">過期時間：</div>
-                <div class="credit-card-date">
-                    <input class="credit-card-date-input" maxlength="2" pattern="[0-9]*" inputmode="numerical" placeholder="MM" type="text" data-pattern-validate/>
-                    <input class="credit-card-date-input" maxlength="2" pattern="[0-9]*" inputmode="numerical" placeholder="YY" type="text" data-pattern-validate/>
-                </div>           
-                <div class="info-form-head">驗證密碼：</div>
-                <input class="info-form-input" maxlength="3" pattern="[0-9]*" inputmode="numerical" placeholder="CVV" type="text" data-pattern-validate/>
+                <div class="info-form-head">卡片號碼：</div>     
+                <div class="tpfield" id="card-number"></div>
+                <div class="info-form-head">過期時間：</div>  
+                <div class="tpfield" id="card-expiration-date"></div>
+                <div class="info-form-head">驗證密碼：</div>  
+                <div class="tpfield" id="card-ccv"></div>
             </form>
         </div>
         <div id="checkout-info" class="info-container">
             <div class="checkout-container">
                 <div id="checkout-total" class="booking-main-info-head"></div>
-                <button type="submit" class="checkout-button">確認訂購並付款</button>
+                <button id="checkout-button" type="submit" class="checkout-button">確認訂購並付款</button>
+                <div id="checkout-alert" class="checkout-alert">付款資訊有誤</div>
+                <div id="input-alert" class="checkout-alert">請完整填寫聯絡資訊</div>
             </div>
         </div>
     </div>
-    
+    <script src="{{ url_for('static', filename='scripts/tappay.js')}}"></script>
 {% endblock main %}

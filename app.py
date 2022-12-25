@@ -176,9 +176,6 @@ def user_signup():
 	else:
 		return (jsonify(error = True, message = "the data is not filled out correctly"), 400)
 
-
-
-
 @app.route("/api/user/auth", methods=["GET"])
 @token_auth
 def user_auth():
@@ -268,8 +265,8 @@ def booking_get():
 			attraction_header = [row_headers[0], row_headers[1], row_headers[2], "image"]
 			attraction_result = [my_result[0], my_result[1], my_result[2], my_result[3]]
 			json_attraction = dict(zip(attraction_header, attraction_result))
-			formatted_result = [json_attraction, my_result[4].strftime("%Y-%m-%d"), my_result[5], my_result[6]]
 			formatted_headers = ["attraction", row_headers[4], row_headers[5], row_headers[6]]
+			formatted_result = [json_attraction, my_result[4].strftime("%Y-%m-%d"), my_result[5], my_result[6]]
 			json_result = dict(zip(formatted_headers, formatted_result))
 			return (jsonify(data = json_result), 200)
 	except:
@@ -316,12 +313,140 @@ def booking_delete():
 		token = request.cookies.get("token")
 		data = jwt.decode(token, secretkey, algorithms="HS256")
 		user_id = data["id"]
-		print(user_id)
-		my_query = "DELETE FROM Booking WHERE user_id = %s ORDER BY Booking.id DESC LIMIT 1;"
+		my_query = "DELETE FROM Booking WHERE user_id = %s;"
 		my_cursor.execute(my_query, [user_id])
 		connection_object.commit()
-		print("fine")
 		return (jsonify(ok = True), 200)
+	except:
+		return (jsonify(error = True, message = "internal server error"), 500)
+	finally:
+		my_cursor.close()
+		connection_object.close()
+
+@app.route("/api/orders", methods=["POST"])
+def orders_post():
+	try:
+		connection_object = connection_pool.get_connection()
+		my_cursor = connection_object.cursor()
+		booking_data = request.json
+		date_today = datetime.datetime.now().date()
+		nb_date = date_today.strftime("%Y%m%d")
+		check_query = "SELECT COUNT(id) FROM Orders WHERE order_date = %s;"
+		my_cursor.execute(check_query, [date_today])
+		check_result = my_cursor.fetchone()
+		order_query = "INSERT INTO Orders (price, attr_id, date, time, name, email, phone, user_id, order_date, number) \
+			VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s);"
+		if check_result[0]:
+			nb_serial = str(check_result[0] + 1).zfill(3)
+		else:
+			nb_serial = str(1).zfill(3)
+		price = booking_data["order"]["price"]
+		attr_id = booking_data["order"]["trip"]["attraction"]["id"]
+		date = booking_data["order"]["date"]
+		time = booking_data["order"]["time"]
+		name = booking_data["contact"]["name"]
+		email = booking_data["contact"]["email"]
+		phone = booking_data["contact"]["phone"]
+		token = request.cookies.get("token")
+		data = jwt.decode(token, secretkey, algorithms="HS256")
+		user_id = data["id"]
+		number = nb_date + nb_serial
+		my_cursor.execute(order_query, (price, attr_id, date, time, name, email, phone, user_id, date_today, number))
+		connection_object.commit()
+
+		tappay_url = "https://sandbox.tappaysdk.com/tpc/payment/pay-by-prime"
+		partner_key = "partner_VvwnE3ol8V9WcyDTbNDFNzTpcrSAUscgSGXFcVTNFXM8euTq7ltzr5l9"
+		headers = {
+			"Content-Type": "application/json",
+			"x-api-key": partner_key
+		}
+		data = {
+			"prime": booking_data["prime"],
+			"partner_key": partner_key,
+			"merchant_id": "esperanza_NCCC",
+			"details":"TapPay Test",
+			"amount": price,
+			"cardholder": {
+				"phone_number": phone,
+				"name": name,
+				"email": email
+			},
+			"remember": True
+		}
+		resp = requests.post(tappay_url, headers = headers, json = data)
+		resp_json = resp.json()
+		if resp_json["status"] == 0:
+			# write into Payment
+			pay_query = "INSERT INTO Payment (number, pay_status, user_id) VALUES (%s, 0, %s);"
+			my_cursor.execute(pay_query, (number, user_id))
+			connection_object.commit()
+			# update pay_status in Orders
+			order_query = "UPDATE Orders SET pay_status = 0 WHERE number = %s;"
+			my_cursor.execute(order_query, [number])
+			connection_object.commit()
+			# delete from booking
+			delete_query = "DELETE FROM Booking WHERE user_id = %s;"
+			my_cursor.execute(delete_query, [user_id])
+			connection_object.commit()
+			order_data = {"status": 0, "message": "付款成功"}
+		else:
+			# write into Payment
+			pay_query = "INSERT INTO Payment (number, user_id) VALUES (%s, %s);"
+			my_cursor.execute(pay_query, (number, user_id))
+			connection_object.commit()
+			order_data = {"status": 1, "message": "付款失敗"}
+		return (jsonify(data = {"number": number, "payment": order_data}), 200)
+	except (ValueError, IndexError, TypeError) as error:
+		return (jsonify(error = True, message = error.args[0]), 400)
+	except:
+		return (jsonify(error = True, message = "internal server error"), 500)
+	finally:
+		my_cursor.close()
+		connection_object.close()
+
+@app.route("/api/order/<orderNumber>", methods=["GET"])
+@token_auth
+def orders_get(orderNumber):
+	try:
+		connection_object = connection_pool.get_connection()
+		my_cursor = connection_object.cursor()
+		token = request.cookies.get("token")
+		data = jwt.decode(token, secretkey, algorithms="HS256")
+		user_id = data["id"]
+		my_query = "SELECT Orders.*, Attraction.id, Attraction.name, Attraction.address, Attr_img.images \
+			FROM Orders \
+			INNER JOIN Attraction ON Orders.attr_id = Attraction.id \
+			INNER JOIN Attr_img ON Orders.attr_id = Attr_img.attr_id \
+			WHERE Orders.number = %s AND Orders.user_id = %s \
+			ORDER BY Orders.number DESC LIMIT 0,1;"
+		my_cursor.execute(my_query, (int(orderNumber), user_id))
+		my_result = my_cursor.fetchone()
+		if my_result  == None:
+			return (jsonify(data = None), 200)
+		else:
+			row_headers = [x[0] for x in my_cursor.description]
+
+			# format attraction data
+			attr_headers = [row_headers[12], row_headers[13], row_headers[14], "image"]
+			attr_result = [my_result[12], my_result[13], my_result[14], my_result[15]]
+			attr_json = dict(zip(attr_headers, attr_result))
+
+			# format trip data
+			trip_headers = ["attraction", row_headers[3], row_headers[4]]
+			trip_result = [attr_json, my_result[3].strftime("%Y-%m-%d"), my_result[4]]
+			trip_json = dict(zip(trip_headers, trip_result))
+
+			# format contact data
+			contact_headers = [row_headers[5], row_headers[6], row_headers[7]]
+			contact_result = [my_result[5], my_result[6], my_result[7]]
+			contact_json = dict(zip(contact_headers, contact_result))
+			
+			# format overall data
+			formatted_headers = [row_headers[10], row_headers[1], "trip", "contact", "status"]
+			formatted_result = [my_result[10], my_result[1], trip_json, contact_json, my_result[11]]
+			formatted_json = dict(zip(formatted_headers, formatted_result))
+
+			return (jsonify(data = formatted_json), 200)
 	except:
 		return (jsonify(error = True, message = "internal server error"), 500)
 	finally:
