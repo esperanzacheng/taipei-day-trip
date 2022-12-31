@@ -7,6 +7,7 @@
 {% block script %}
 <script src="{{ url_for('static', filename='scripts/booking.js')}}"></script>
 <script src="{{ url_for('static', filename='scripts/login-function.js')}}"></script>
+<script src="{{ url_for('static', filename='scripts/env.js')}}"></script>
 <script src="https://js.tappaysdk.com/sdk/tpdirect/v5.14.0"></script>
 {% endblock script %}
 {% block main %}
@@ -45,6 +46,7 @@
                 <button id="checkout-button" type="submit" class="checkout-button">確認訂購並付款</button>
                 <div id="checkout-alert" class="checkout-alert">付款資訊有誤</div>
                 <div id="input-alert" class="checkout-alert">請完整填寫聯絡資訊</div>
+                <div id="input-format-alert" class="checkout-alert">聯絡資訊格式有誤</div>
             </div>
         </div>
     </div>

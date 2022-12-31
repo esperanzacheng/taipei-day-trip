@@ -5,7 +5,7 @@ window.onload = function() {
     getBooking();
     userRegister();
     userLogin();
-    userLogOut();
+    // userLogOut();
 }
 
 // check login status and set username in greeting html item
@@ -18,10 +18,11 @@ function loginCheck() {
         return res.json();
     })
     .then((data) => {
-        const logOut = document.getElementById("log-out-button");
+        const memberCenter = document.getElementById("member-button");
         const logIn = document.getElementById("log-in-button");
         if (data["data"]) {
-            logOut.style.display = "block";
+            memberCenter.style.display = "block";
+            memberCenter.setAttribute("href", "/member");
             logIn.style.display = "none";
             const greeting = document.getElementById("main-greeting");
             greeting.style.display = "block";
@@ -62,7 +63,7 @@ async function getBooking() {
             infoDateHead.classList.add("booking-main-info-head");
             infoDateHead.textContent = "日期：";
             let infoDateInfo = document.createElement("div");
-            infoDateInfo.classList.add("booking-main-info-info");
+            infoDateInfo.classList.add("booking-main-info-date");
             infoDateInfo.textContent = bookingData["date"];
             let infoTimeHead = document.createElement("div");
             infoTimeHead.classList.add("booking-main-info-head");

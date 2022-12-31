@@ -7,6 +7,7 @@ from functools import wraps
 import requests
 import os
 from dotenv import load_dotenv
+import re
 load_dotenv()
 
 app=Flask(__name__)
@@ -41,6 +42,9 @@ def booking():
 @app.route("/thankyou")
 def thankyou():
 	return render_template("thankyou.html")
+@app.route("/member")
+def member():
+	return render_template("member.html")
 
 # API
 connection_pool = mysql.connector.pooling.MySQLConnectionPool(
@@ -80,7 +84,7 @@ def api_attractions():
 		row_headers = [x[0] for x in my_cursor.description] # get column name
 		json_result = [] # store attraction data into json_result[]
 		for result in my_result:
-			json_result.append(dict(zip(row_headers,result)))
+			json_result.append(dict(zip(row_headers, result)))
 		for result in json_result: # change images url string to list
 			result["images"] = result["images"].split(",")
 		
@@ -153,7 +157,11 @@ def user_signup():
 	name = request.json["name"]
 	email = request.json["email"]
 	password = request.json["password"]
-	if name and email and password:
+
+	if not re.match("[^@]+@[^@]+\.[^@]+", email):
+		return (jsonify(error = True, message = "Provided email is not an email address"), 400)
+
+	elif name and email and password:
 		try:
 			connection_object = connection_pool.get_connection()
 			my_cursor = connection_object.cursor()
@@ -287,9 +295,15 @@ def booking_post():
 		date = request.json["date"]
 		time = request.json["time"]
 		price = request.json["price"]
-		check_query = "SELECT * FROM Booking WHERE user_id = %s AND date = %s;"
-		my_cursor.execute(check_query, (user_id, date))
-		check_result = my_cursor.fetchone()
+		if date and time:
+			if re.match("[\d]{4}-[\d]{2}-[\d]{2}", date) and (time == "afternoon" or time == "morning"):
+				check_query = "SELECT * FROM Booking WHERE user_id = %s AND date = %s;"
+				my_cursor.execute(check_query, (user_id, date))
+				check_result = my_cursor.fetchone()
+			else:
+				return (jsonify(error = True, message = "date or time format is wrong"), 400)
+		else:
+			return (jsonify(error = True, message = "date or time is missing"), 400)
 		if not check_result:
 			book_query = "REPLACE INTO Booking (attr_id, date, time, price, user_id) VALUES (%s, %s, %s, %s, %s);"
 			my_cursor.execute(book_query, (attraction_id, date, time, price, user_id))
@@ -340,6 +354,7 @@ def orders_post():
 			nb_serial = str(check_result[0] + 1).zfill(3)
 		else:
 			nb_serial = str(1).zfill(3)
+
 		price = booking_data["order"]["price"]
 		attr_id = booking_data["order"]["trip"]["attraction"]["id"]
 		date = booking_data["order"]["date"]
@@ -351,6 +366,10 @@ def orders_post():
 		data = jwt.decode(token, secretkey, algorithms="HS256")
 		user_id = data["id"]
 		number = nb_date + nb_serial
+		if not re.match("[^@]+@[^@]+\.[^@]+", email):
+			return (jsonify(error = True, message = "Provided email is not an email address"), 400)
+		elif not re.match("[\d]{10}", phone):
+			return (jsonify(error = True, message = "Provided phone is not a phone number"), 400)
 		my_cursor.execute(order_query, (price, attr_id, date, time, name, email, phone, user_id, date_today, number))
 		connection_object.commit()
 
@@ -406,7 +425,7 @@ def orders_post():
 
 @app.route("/api/order/<orderNumber>", methods=["GET"])
 @token_auth
-def orders_get(orderNumber):
+def order_get(orderNumber):
 	try:
 		connection_object = connection_pool.get_connection()
 		my_cursor = connection_object.cursor()
@@ -452,6 +471,103 @@ def orders_get(orderNumber):
 	finally:
 		my_cursor.close()
 		connection_object.close()
+
+@app.route("/api/order", methods=["GET"])
+@token_auth
+def orders_get():
+	try:
+		connection_object = connection_pool.get_connection()
+		my_cursor = connection_object.cursor()
+		token = request.cookies.get("token")
+		data = jwt.decode(token, secretkey, algorithms="HS256")
+		user_id = data["id"]
+		my_query = "SELECT Payment.*, Orders.price, Orders.date, Orders.time, Attraction.name \
+			FROM Orders INNER JOIN Payment ON Orders.number = Payment.number \
+			INNER JOIN Attraction ON Orders.attr_id = Attraction.id \
+			WHERE Payment.user_id = %s;"
+		my_cursor.execute(my_query, [user_id])
+		my_result = my_cursor.fetchall()
+		if my_result == []:
+			return (jsonify(ok = True, data = None), 200)
+		else:
+			row_headers = [x[0] for x in my_cursor.description]
+			json_result = []
+			for result in my_result:
+				json_result.append(dict(zip(row_headers, result)))
+			for result in json_result:
+				result["date"] = result["date"].strftime("%Y-%m-%d")
+
+			return (jsonify(ok = True, data = json_result), 200)
+	except:
+		return (jsonify(error = True, message = "internal server error"), 500)
+	finally:
+		my_cursor.close()
+		connection_object.close()
+
+@app.route("/api/user/imgs", methods=["GET"])
+@token_auth
+def imgs_get():
+	try:
+		connection_object = connection_pool.get_connection()
+		my_cursor = connection_object.cursor()
+		my_query = "SELECT id, breed FROM User_img;"
+		my_cursor.execute(my_query)
+		my_result = my_cursor.fetchall()
+		row_headers = [x[0] for x in my_cursor.description]
+		json_result = []
+		for result in my_result:
+			json_result.append(dict(zip(row_headers, result)))
+		return jsonify(ok = True, data = json_result)
+	except:
+		return (jsonify(error = True, message = "internal server error"), 500)
+	finally:
+		my_cursor.close()
+		connection_object.close()
+
+@app.route("/api/user/<id>", methods=["GET"])
+@token_auth
+def img_get(id):
+	try:
+		connection_object = connection_pool.get_connection()
+		my_cursor = connection_object.cursor()
+		my_query = "SELECT User_img.img FROM User \
+			INNER JOIN User_img on User.img_id = User_img.id \
+			WHERE User.id = %s;"
+		my_cursor.execute(my_query, [id])
+		my_result = my_cursor.fetchall()
+		str_result = [x[0] for x in my_result]
+		return jsonify(data = str_result)
+	except:
+		return (jsonify(error = True, message = "internal server error"), 500)
+	finally:
+		my_cursor.close()
+		connection_object.close()
+
+@app.route("/api/user/imgs", methods=["PATCH"])
+def change_img():
+	try:
+		connection_object = connection_pool.get_connection()
+		my_cursor = connection_object.cursor()
+		token = request.cookies.get("token")
+		data = jwt.decode(token, secretkey, algorithms="HS256")
+		user_id = data["id"]
+		img_id = request.json["img_id"]
+		update_query = "UPDATE User SET img_id = %s where id = %s;"
+		my_cursor.execute(update_query, (img_id, user_id))
+		connection_object.commit()
+		img_url_query = "SELECT User_img.img FROM User \
+			INNER JOIN User_img on User.img_id = User_img.id \
+			WHERE User.id = %s;"
+		my_cursor.execute(img_url_query, [user_id])
+		my_result = my_cursor.fetchone()
+		str_result = {"img": my_result}
+		return (jsonify(ok = True, data = str_result), 200)
+	except:
+		return (jsonify(error = True, message = "internal server error"), 500)
+	finally:
+		my_cursor.close()
+		connection_object.close()
+
 
 if __name__ == "__main__":
     app.run(host = "0.0.0.0", port = 3000, debug = True)

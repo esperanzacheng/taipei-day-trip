@@ -229,6 +229,7 @@
     grid-row: 5/6;
     font-weight: 400;
     font-size: 16px;
+    line-height: 1.8;
 }
 
 .detail-h-trans {
@@ -241,6 +242,7 @@
     grid-row: 8/9;
     font-weight: 400;
     font-size: 16px;
+    line-height: 1.8;
 }
 
 @media (max-width: 1200px) {
