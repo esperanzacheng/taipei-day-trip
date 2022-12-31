@@ -9,7 +9,7 @@ window.onload = function() {
     selectPhoto();
     setTimeout(() => {
         showPhoto(memberId);
-    }, 100)
+    }, 1000)
 }
 
 // check login status and set username in greeting html item
