@@ -24,30 +24,41 @@ function userRegister() {
         let name = document.getElementById("register-name").value;
         let email = document.getElementById("register-email").value;
         let password = document.getElementById("register-password").value;
-        fetch(url, {
-            method: "POST",
-            credentials: "include",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                "name": name,
-                "email": email,
-                "password": password,
+        if(name && email && password) {
+            fetch(url, {
+                method: "POST",
+                credentials: "include",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    "name": name,
+                    "email": email,
+                    "password": password,
+                })
             })
-        })
-        .then((res) => {
-            return res.json();
-        })
-        .then((data) => {
-            const emailIsUsed = document.getElementById("email-is-used");
-            if(data["ok"] == true) {
-                const registerSuccess = document.getElementById("register-success");
-                registerSuccess.style.display = "block";
-            } else if (data["message"] == "this email is used") {                
-                emailIsUsed.style.display = "block";
-            }
-        })
+            .then((res) => {
+                return res.json();
+            })
+            .then((data) => {
+                removeAlert();
+                if(data["ok"] == true) {
+                    const registerSuccess = document.getElementById("register-success");
+                    registerSuccess.style.display = "block";
+                } else if (data["message"] == "this email is used") {                
+                    const emailIsUsed = document.getElementById("email-is-used");
+                    emailIsUsed.style.display = "block";
+                } else if (data["message"] == "Provided email is not an email address") {
+                    const emailIsNotFormatted = document.getElementById("email-is-not-formatted");
+                    emailIsNotFormatted.style.display = "block";
+                }
+            })
+        } else {
+            // display input is wrong
+            removeAlert();
+            const registerFailure = document.getElementById("regitser-input-is-wrong");
+            registerFailure.style.display = "block";
+        }
     })
 }
 
@@ -89,28 +100,6 @@ function userLogin() {
     })
 }
 
-// log out and delete token
-function userLogOut() {
-    const logoutButton = document.getElementById("log-out-button");
-    logoutButton.addEventListener("click", (e) => {
-        e.preventDefault();
-        let url = "/api/user/auth";
-        fetch(url, {
-            method: "DELETE",
-            credentials: "include",
-            headers: {
-                "Content-Type": "application/json"
-            },
-        })
-        .then((res) => {
-            return res.json();
-        })
-        .then((data) => {
-            window.location.reload();
-        })
-    })
-}
-
 // check if user login
 function ajax() {
     let url = "/api/user/auth";
@@ -121,15 +110,16 @@ function ajax() {
         return res.json();
     })
     .then((data) => {
-        let logOut = document.getElementById("log-out-button");
+        let memberCenter = document.getElementById("member-button");
         let logIn = document.getElementById("log-in-button");
         if (data["data"]) {
-            logOut.style.display = "block";
+            memberCenter.style.display = "block";
+            memberCenter.setAttribute("href", "/member");
             logIn.style.display = "none";
             bookLink();
             
         } else {
-            logOut.style.display = "none";
+            memberCenter.style.display = "none";
             logIn.style.display = "block";
             let bookButton = document.getElementById("booking-checkout");
             bookButton.setAttribute("onclick", "showLoginForm()");
@@ -187,5 +177,11 @@ function removeAlert() {
     }
     if (document.getElementById("email-is-used")) {
         document.getElementById("email-is-used").style.display = "none";
+    }
+    if (document.getElementById("regitser-input-is-wrong")) {
+        document.getElementById("regitser-input-is-wrong").style.display = "none";
+    }
+    if (document.getElementById("register-success")) {
+        document.getElementById("register-success").style.display = "none";
     }
 }

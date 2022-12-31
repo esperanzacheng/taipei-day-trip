@@ -8,7 +8,6 @@ window.onload = function() {
     setCalendar()
     userRegister();
     userLogin();
-    userLogOut();
     showFee();
 }
 
@@ -176,6 +175,7 @@ function submitBooking() {
         }
         const timeSlotAlert = document.getElementById("time-slot-alert");
         const missingDataAlert = document.getElementById("missing-data-alert");
+        const wrongDataAlert = document.getElementById("wrong-data-alert");
         if (dateInput.value && timeInput.value) {
             fetch(url, {
                 method: "POST",
@@ -198,7 +198,16 @@ function submitBooking() {
                 } else if (data["message"] == "time slot conflict") {
                     timeSlotAlert.style.display = ("block");
                     missingDataAlert.style.display = ("none");
+                    wrongDataAlert.style.display = ("none");
                     timeSlotAlert.setAttribute("href", "/booking")
+                } else if (data["message"] == "date or time is missing") {
+                    missingDataAlert.style.display = ("block");
+                    timeSlotAlert.style.display = ("none");
+                    wrongDataAlert.style.display = ("none");
+                } else if (data["message"] == "date or time format is wrong") {
+                    wrongDataAlert.style.display = ("block");
+                    missingDataAlert.style.display = ("none");
+                    timeSlotAlert.style.display = ("none");
                 }
             })
             .catch((error) => {
@@ -207,6 +216,7 @@ function submitBooking() {
         } else {
             missingDataAlert.style.display = ("block");
             timeSlotAlert.style.display = ("none");
+            wrongDataAlert.style.display = ("none");
         }
     })
 }
@@ -221,15 +231,16 @@ function checkLoginSetButton() {
         return res.json();
     })
     .then((data) => {
-        const logOut = document.getElementById("log-out-button");
+        const memberCenter = document.getElementById("member-button");
         const logIn = document.getElementById("log-in-button");
         if (data["data"]) {
-            logOut.style.display = "block";
+            memberCenter.style.display = "block";
+            memberCenter.setAttribute("href", "/member");
             logIn.style.display = "none";
             bookLink();
             submitBooking();
         } else {
-            logOut.style.display = "none";
+            memberCenter.style.display = "none";
             logIn.style.display = "block";
             const bookButton = document.getElementById("booking-checkout");
             bookButton.setAttribute("onclick", "showLoginForm()");

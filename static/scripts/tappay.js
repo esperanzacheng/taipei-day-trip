@@ -1,4 +1,4 @@
-TPDirect.setupSDK(126968, "app_NT7RusBZrRieGDPQ0KRdJlOYX10FXZqeJRM25KPTCplfUml1LwJu0OCYN2hl", 'sandbox');
+TPDirect.setupSDK(126968, appKey, 'sandbox');
 
 let fields = {
     number: {
@@ -119,12 +119,18 @@ function checkInputAndSubmit() {
                 return res.json();
             })
             .then((data) => {
+                const checkoutAlert = document.getElementById("checkout-alert");
+                const inputAlert = document.getElementById("input-alert");
+                const formatAlert = document.getElementById("input-format-alert");
                 if (data["data"]) {
                     window.location = `/thankyou?number=${data["data"]["number"]}`;
+                } else if (data["message"] == "Provided email is not an email address" || data["message"] == "Provided phone is not a phone number") {
+                    formatAlert.style.display = "block";
+                    checkoutAlert.style.display = "none";
+                    inputAlert.style.display = "none";
                 } else {
-                    const checkoutAlert = document.getElementById("checkout-alert");
-                    const inputAlert = document.getElementById("input-alert");
                     checkoutAlert.style.display = "block";
+                    formatAlert.style.display = "none";
                     inputAlert.style.display = "none";
                 }
             })
@@ -135,7 +141,9 @@ function checkInputAndSubmit() {
     } else {
         const inputAlert = document.getElementById("input-alert");
         const checkoutAlert = document.getElementById("checkout-alert");
+        const formatAlert = document.getElementById("input-format-alert");
         inputAlert.style.display = "block";
         checkoutAlert.style.display = "none";
+        formatAlert.style.display = "none";
     }
 }
