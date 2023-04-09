@@ -37,7 +37,7 @@
 .booking-main-info-container{
     display: grid;
     place-self: start;
-    place-items: center start;
+    place-items: start;
     grid-template-rows: 1.5fr repeat(4, 1fr);
     grid-template-columns: 50px auto;
     height: 160px;
@@ -60,6 +60,13 @@
     font-weight: 500;
     font-size: 16px;
     color: #666666;
+}
+
+.booking-main-info-date{
+    font-weight: 500;
+    font-size: 16px;
+    color: #666666;
+    padding-top: 1.5%;
 }
 
 .booking-main-delete-button{

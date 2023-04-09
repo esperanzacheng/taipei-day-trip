@@ -64,6 +64,7 @@ html,body{
     cursor: pointer;
     display: none;
     place-self: center;
+    text-decoration: none;
 }
 
 .banner-container{
@@ -139,6 +140,7 @@ html,body{
     place-self: stretch center;
     border: hidden;
     border-radius: 5px;
+    cursor: pointer;
 }
 
 .banner-login-alert-error{
@@ -250,6 +252,7 @@ input{
 
 .banner-form-icon{
     width: 30px;
+    height: 30px;
 }
 
 .banner-form-dropdown{
@@ -365,17 +368,11 @@ input{
     display: grid;
     place-items: center;
     background-color: #757575;
-
-    /* position: fixed; */
-    /* bottom: 0; */
-    /* width: 100%; */
-    /* position: absolute; */
-    /* top: 90%; */
 }
 
 img{
     width: 100%; 
-    max-height: 100%;
+    height: 100%;
     object-fit: cover;
 }
 

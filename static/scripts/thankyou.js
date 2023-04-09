@@ -7,7 +7,7 @@ window.onload = function() {
     bookLink();
     userRegister();
     userLogin();
-    userLogOut();
+    // userLogOut();
     getOrder(thisNb);
 }
 

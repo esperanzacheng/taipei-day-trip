@@ -14,7 +14,6 @@ window.onload = function() {
     homeLink();
     userRegister();
     userLogin();
-    userLogOut();
 }
 
 // click anywhere to close the search bar
