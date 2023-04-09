@@ -91,6 +91,7 @@ function checkInputAndSubmit() {
         TPDirect.card.getPrime((result) => {
             if (result.status !== 0) {
                 console.log('get prime error ' + result.msg)
+                console.log(result)
                 return
             }
             // create order and charge fee
